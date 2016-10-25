@@ -1,0 +1,106 @@
+{% extends 'main.html' %}
+
+{% block main_content %}
+<hr />
+<ol class="breadcrumb">
+    <li><a href="/">Ви тут: Головна</a></li>
+    <li><a href="/accounts/">Мої рахунки</a></li>
+    <li><a href="/account/{{document.id_account.id}}">Рахунок №{{ document.account_b }}</a></li>
+    <li><a href="/account/docs/{{document.id}}">Документ №{{ document.docnum }}</a></li>
+</ol>
+
+<div class="">
+
+    <div style="width: 100%;  border: 1px solid black; padding: 10px; display: table; border-spacing: 5px;">
+        <div style="display: table-row">
+                <div style="width: 80%; display: table-cell; text-align: center; margin-bottom: 0;">ПЛАТІЖНЕ ДОРУЧЕННЯ №{{document.docnum}}</div>
+                <div style="width: 20%; display: table-cell; text-align: center; border: 1px solid black; margin-bottom: 0; ">0410001</div>
+        </div>
+        <div style="display: table-row">
+                <div style="width: 80%; display: table-cell; text-align: center; margin-bottom: 0;">від {{document.dt| date}}</div>
+                <div style="width: 20%; display: table-cell; text-align: center; margin-bottom: 0; ">Одержано банком<br / >{{document.dt_bank}}</div>
+        </div>
+        <div style="display: table-row">
+                <div style="display: table; width: 100%">
+                    <div style="display: table-cell; width: 20%; text-align: left;" >Платник</div>
+                    <div style="display: table-cell; width: 80%; text-align: left;">{{document.client_a}}</div>
+                </div>
+                <div style="width: 20%; display: table-cell; text-align: center; margin-bottom: 0; "></div>
+        </div>
+        <div style="display: table-row">
+                <div style="display: table; width: 100%">
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 20%; text-align: left;">Код</div>
+                        <div style="display: table-cell; width: 20%; text-align: right; border: 2px solid black;">{{document.ident_a}}</div>
+                        <div style="display: table-cell"></div>
+                    </div>
+                </div>
+                <div style="width: 20%; display: table-cell; text-align: center; margin-bottom: 0; "></div>
+        </div>
+        <div style="display: table-row">
+                <div style="display: table; width: 100%">
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 60%; text-align: left;">Банк платника</div>
+                        <div style="display: table-cell; width: 15%; text-align: center;">код банку</div>
+                        <div style="display: table-cell; width: 25%; text-align: right;">ДЕБЕТ рах №</div>
+                    </div>
+                </div>
+                <div style="width: 20%; display: table-cell; text-align: center; margin-bottom: 0; ">Сума</div>
+        </div>
+        <div style="display: table-row">
+                <div style="display: table; width: 100%">
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 60%; text-align: left;  border-bottom: 2px solid black">{{document.bank_name_a}}</div>
+                        <div style="display: table-cell; width: 15%; text-align: center; border: 2px solid black">{{document.code_bank_a}}</div>
+                        <div style="display: table-cell; width: 25%; text-align: right; border: 2px solid black">{{document.account_a}}</div>
+                    </div>
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 20%; text-align: left; ">Отримувач {{document.client_b}}</div>
+                        <div style="display: table-cell; width: 80%; text-align: left;"></div>
+
+                    </div>
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 20%; text-align: left;">Код</div>
+                        <div style="display: table-cell; width: 20%; text-align: right; border: 2px solid black;">{{document.ident_b}}</div>
+                        <div style="display: table-cell"></div>
+                    </div>
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 60%; text-align: left;"></div>
+                        <div style="display: table-cell; width: 15%; text-align: center;"></div>
+                        <div style="display: table-cell; width: 25%; text-align: right;">КРЕДИТ рах №</div>
+                    </div>
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 60%; text-align: left; ">Банк отримувача</div>
+                        <div style="display: table-cell; width: 15%; text-align: center;">код банку</div>
+                        <div style="display: table-cell; width: 25%; text-align: right; border: 2px solid black">{{document.account_b}}</div>
+                    </div>
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 60%; text-align: left;  border-bottom: 2px solid black">{{document.bank_name_b}}</div>
+                        <div style="display: table-cell; width: 15%; text-align: center; border: 2px solid black">{{document.code_bank_b}}</div>
+                        <div style="display: table-cell; width: 25%; text-align: right; border: 2px solid black">{{document.account_c}}</div>
+                    </div>
+                </div>
+                <div style="width: 20%; display: table-cell; text-align: right; border: 2px solid black; margin-bottom: 0; ">{{document.amount}} UAH </div>
+        </div>
+        <div style="display: table-row">
+                <div style="width: 80%; display: table-cell; text-align: left; margin-bottom: 0;">Сума словами</div>
+                <div style="width: 20%; display: table-cell; text-align: center; margin-bottom: 0;"></div>
+        </div>
+        <br />
+        <div style="display: table-row">
+                <div style="width: 80%; display: table-cell; text-align: left; margin-bottom: 0; border-bottom: 2px solid black"> </div>
+                <div style="width: 20%; display: table-cell; text-align: center; margin-bottom: 0;"></div>
+        </div>
+        <div style="display: table-row">
+                <div style="width: 80%; display: table-cell; text-align: left; margin-bottom: 0;">Призначення платежу</div>
+                <div style="width: 20%; display: table-cell; text-align: center; margin-bottom: 0;"></div>
+        </div>
+        <div style="display: table-row">
+                <div style="width: 80%; display: table-cell; text-align: left; margin-bottom: 0; border-bottom: 2px solid black">{{document.purpose}}</div>
+                <div style="width: 20%; display: table-cell; text-align: right; margin-bottom: 0; border: 2px solid black"> {{document.amount}} UAH</div>
+        </div>
+    </div>
+
+    </div>
+
+{% endblock %}

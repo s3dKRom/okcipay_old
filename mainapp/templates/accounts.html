@@ -1,0 +1,33 @@
+{% extends 'main.html' %}
+
+{% block main_content %}
+<hr />
+<ol class="breadcrumb">
+    <li><a href="/">Ви тут: Головна</a></li>
+    <li><a href="/accounts/">Мої рахунки</a></li>
+</ol>
+<hr />
+<div class="large-offset-1 large-10 columns">
+    <h4> Мої Рахунки </h4>
+    <table class="table table-condensed table-striped">
+        {% csrf_token %}
+        <thead>
+            <tr>
+                <th width="200">Номер рахунку</th>
+                <th>Залишок</th>
+                <th width="150">Валюта</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for account in accounts %}
+            <tr>
+                <td><a href="/account/{{ account.id }}/">{{account.number}}</a></td>
+                <td>{{account.balance}}</td>
+                <td>{{account.currency}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

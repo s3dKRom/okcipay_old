@@ -1,0 +1,51 @@
+{% extends 'main.html' %}
+
+{% block main_content %}
+<hr />
+<ol class="breadcrumb">
+    <li><a href="/">Ви тут: Головна</a></li>
+    <li><a href="/accounts/">Мої рахунки</a></li>
+    <li><a href="/account/{{account.id}}">Рахунок №{{ account.number }}</a></li>
+</ol>
+<hr />
+<div class="large-offset-1 large-11 columns">
+    <h4> Мій Рахунок: {{ account.number }} </h4>
+    <p> Залишок на рахунку: {{ balance }} грн</p>
+    <hr />
+    <table class="table table-condensed table-striped">
+        <thead>
+            <tr>
+                <th width="100">Дата</th>
+                <th width="50">№</th>
+                <th width="200">Контрагент</th>
+                <th width="50">Вид платежу</th>
+                <th>Призначення платежу</th>
+                <th width="100">Сума, грн</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for document in documents %}
+
+            <tr>
+                <td>{{document.dt}}</td>
+                <td><a href="/account/docs/{{document.id}}">{{document.docnum}}</a></td>
+                <td>
+                    {{document.client_a}}
+                    <br/>
+                    <br/>
+                    ЄДРПОУ: {{document.ident_a}}
+                    <br/>
+                    Код банку: {{document.code_bank_a}}
+                    <br/>
+                    Рахунок: {{document.account_a}}
+                </td>
+                <td>{{document.kind}}</td>
+                <td>{{document.purpose}}</td>
+                <td>{{document.amount}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
