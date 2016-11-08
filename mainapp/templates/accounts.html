@@ -23,7 +23,7 @@
             <tr>
                 <td><a href="/account/{{ account.id }}/">{{account.number}}</a></td>
                 <td>{{account.balance}}</td>
-                <td>{{account.currency}}</td>
+                <td>{{account.currency.currency_loc}} ({{account.currency.currency_int}})</td>
             </tr>
             {% endfor %}
         </tbody>

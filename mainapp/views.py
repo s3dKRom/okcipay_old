@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.contrib import auth
 from django.template.context_processors import csrf
-from mainapp.models import Accounts, Users_Accounts, Balances, Documents
+from mainapp.models import Accounts, Users_Accounts, Balances, Documents, Currencies, Banks
 from datetime import date, datetime
 
 # Create your views here.
@@ -17,6 +17,7 @@ def accounts(request):
     accounts = Accounts.objects.all()
     for account in accounts:
         account.balance = '{:.2f}'.format(float(Balances.objects.filter(id_account=account.id).latest('dt').balance) / 100.00)
+        account.currency = Currencies.objects.get(code_currency=account.currency)
     args['accounts'] = accounts
     return render_to_response('accounts.html', args)
 
@@ -38,9 +39,12 @@ def doc(request, id):
     args = {}
     args.update(csrf(request))
     document = Documents.objects.get(id=id)
+    document.words_amount = convert_num2text(document.amount)
     document.amount = '{:.2f}'.format(float(document.amount) / 100.00)
     document.dt = datetime.strptime(document.dt, '%Y/%m/%d %H:%M:%S')
     document.dt_bank = datetime.strptime(document.dt_bank, '%Y/%m/%d %H:%M:%S')
+    document.bank_name_a = Banks.objects.get(code_bank=document.code_bank_a).bank_name
+    document.bank_name_b = Banks.objects.get(code_bank=document.code_bank_b).bank_name
     args['document'] = document
     args['username'] = auth.get_user(request).username
     return render_to_response('doc.html', args)
@@ -67,11 +71,130 @@ def doc2pdf(request, id):
     p.save()
     return response
 
-def convert_int2text (number):
+def convert_num2text(number):
+    """ Функція для перетворення числа копійок в грошову суму словами. Число-аргумент може бути як в числовій так і в строковій формі.
+        Функція приймає один аргумент number (може бути як str так і int): максимальне число 14 знаків.
+        Функція повертає результат str"""
+
+    """ Задаємо необхідні закінчення для сум"""
+    kopeks = (u'копійок', u'копійка', u'копійки', u'копійки', u'копійки',)
+    currency = (u'грн.', u'гривня', u'гривні', u'гривні', u'гривні', u'гривень',)
+
+    thousand = (u'тисяч', u'тисяча', u'тисячі', u'тисячі', u'тисячі', u'тисяч',)
+    million = (u'мільйонів', u'мільйон', u'мільйони', u'мільйони', u'мільйони', u'мільйонів',)
+    billion = (u'мільярдів', u'мільярд', u'мільярди', u'мільярди', u'мільярди', u'мільярдів',)
+
+    """ Локалізуємо змінні """
     number_str = str(number)
     number_int = int(number)
-    number_range = number_int // 3
-    while  number_range != 0:
-        number_text = convert_int2text (number)
-        number_range -=1
+    number_len = len(number_str)
+
+    """ Обнулюємо змінні """
+    number_text = ''
+    amount_kopeks = ''
+    amount_currency = ''
+    amount_thousand = ''
+    amount_million = ''
+    amount_billion = ''
+
+    """ Перевіримо чи аргумент функції не перевищує 14 знаків """
+    if number_len > 14:
+        number_text = 'Будьте уважні! Максимальне число знаків може бути не більше 14!'
+        return number_text
+
+    """ Створюємо допоміжну функцію, яка переводить тризначне число в суму словами і добавляє в кінці відповідне закінчення.
+        В функцію передаємо три аргументи: args[0] -- закінчення для суми, початкове (args[1]) і кінцеве (args[2]) значення для зрізу в number_str
+        Функція повертає результат str"""
+    def amount_helper(*args):
+        result = ''
+        if int(number_str[args[2]]) < 5 and 10 < int(number_str[(args[2]-1):(args[2]+1)]) or 19 < int(number_str[(args[2]-1):(args[2]+1)]) or int(number_str[args[2]]) < 5:
+            result = str(convert_number_under_1000_2_text(number_str[args[1]:(args[2] + 1)])) + args[0][int(number_str[args[2]])]
+        else:
+            result = str(convert_number_under_1000_2_text(number_str[args[1]:(args[2]+1)])) + args[0][0]
+        return result
+
+    """ Формуємо суму копійок"""
+    amount_kopeks = number_str[-2:] + ' коп.'
+
+
+    """ Формуємо суму гривень"""
+    if number_len > 2:
+        if int(number_str[-5:-2]) != 0:
+            amount_currency = amount_helper(currency, -5, -3)
+        else:
+            amount_currency = currency[0]
+    else:
+        amount_currency = str(convert_number_under_1000_2_text(0)) + currency[0]
+
+    """ узгоджуємо відмінки для одиниць """
+    if (amount_currency.find('один ') + 1):
+        amount_currency = amount_currency.replace('один ', 'одна ')
+    if (amount_currency.find('два ') + 1):
+        amount_currency = amount_currency.replace('два ', 'дві ')
+
+    """ Формуємо суму тисяч"""
+    if number_len > 5 and int(number_str[-8:-5]) != 0:
+        amount_thousand = amount_helper(thousand, -8, -6)
+
+    """ узгоджуємо відмінки для тисяч """
+    if (amount_thousand.find('один ') + 1):
+        amount_thousand = amount_thousand.replace('один ', 'одна ')
+    if (amount_thousand.find('два ') + 1):
+        amount_thousand = amount_thousand.replace('два ', 'дві ')
+
+    """ Формуємо суму мільйонів"""
+    if number_len > 8 and int(number_str[-11:-8]) != 0:
+        amount_million = amount_helper(million, -11, -9)
+
+    """ Формуємо суму мільярдів"""
+    if number_len > 11 and int(number_str[-14:-11]) != 0:
+        number_str = '0' + number_str
+        amount_billion = amount_helper(billion, -14, -12)
+
+    """ Формуємо результат"""
+    number_text = amount_billion + ' ' + amount_million + ' ' + amount_thousand + ' ' + amount_currency + ' ' + amount_kopeks
+    result = number_text.capitalize()
+
+
+    return result
+
+""" Створюємо допоміжну функцію, яка переводить тризначне число в суму словами.
+        В функцію передаємо один аргумент: number -- тризначне число (може бути як int так str)
+        Функція повертає результат str"""
+def convert_number_under_1000_2_text(number):
+    """ Формуємо необхідні списки значень """
+    one_to_nineteen = (u'нуль', u'один', u'два', u'три', u'чотири', u'п\'ять',
+                       u'шість', u'сім', u'вісім', u'дев\'ять',u'десять',
+                       u'одиннадцять', u'дванадцять', u'тринадцять', u'чотирнадцять', u'п\'ятнадцять',
+                       u'шістнадцять', u'сімнадцять', u'вісімнадцять', u'девятнадцять')
+
+    decs = ('', u'десять', u'двадцять', u'тридцять', u'сорок', u'п\'ятдесят',
+            u'шістдесять', u'сімдесять', u'вісімдесять', u'дев\'яносто')
+
+    hundreds = ('', u'сто', u'двісті', u'триста', u'чотириста', u'п\'ятсот',
+                u'шістсот', u'сімсот', u'вісімсот', u'дев\'ятсот')
+
+    """ Локалізуємо змінні """
+    number_str = str(number)
+    number_int = int(number)
+
+    """ Обнулюємо результат """
+    result = ''
+
+    """ Обраховуємо результат """
+    if number_int > 99:
+        result += hundreds[int(number_str[0])] + ' '
+
+    if number_int > 19 and int(number_str[-2:]) >= 20:
+        result += decs[int(number_str[-2])] + ' '
+        if int(number_str[-1]):
+            result += one_to_nineteen[int(number_str[-1])] + ' '
+
+    if 0 < int(number_str[-2:]) < 20:
+        result += one_to_nineteen[int(number_str[-2:])] + ' '
+
+    if number_int == 0:
+        result = one_to_nineteen[0] + ' '
+
+
     return result

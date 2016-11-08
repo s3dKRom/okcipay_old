@@ -20,7 +20,7 @@ class Balances(models.Model):
     class Meta():
         db_table = 'balances'
     id_account = models.ForeignKey(Accounts)
-    dt = models.DateField()
+    dt = models.TextField()
     balance = models.DecimalField(max_digits=16, decimal_places=0)
 
 class Users_Accounts(models.Model):
@@ -52,3 +52,16 @@ class Documents(models.Model):
     amount = models.DecimalField(max_digits=16, decimal_places=0, null=True)
     purpose = models.TextField()
     amount_nv = models.DecimalField(max_digits=16, decimal_places=0, null=True)
+
+class Currencies(models.Model):
+    class Meta():
+        db_table = 'currencies'
+    code_currency = models.DecimalField(max_digits=3, decimal_places=0)
+    currency_int = models.TextField()
+    currency_loc = models.TextField()
+
+class Banks(models.Model):
+    class Meta():
+        db_table = 'banks'
+    code_bank = models.DecimalField(max_digits=6, decimal_places=0)
+    bank_name = models.TextField()
