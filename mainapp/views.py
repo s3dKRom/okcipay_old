@@ -107,10 +107,11 @@ def convert_num2text(number):
         Функція повертає результат str"""
     def amount_helper(*args):
         result = ''
-        if int(number_str[args[2]]) < 5 and 10 < int(number_str[(args[2]-1):(args[2]+1)]) or 19 < int(number_str[(args[2]-1):(args[2]+1)]) or int(number_str[args[2]]) < 5:
-            result = str(convert_number_under_1000_2_text(number_str[args[1]:(args[2] + 1)])) + args[0][int(number_str[args[2]])]
+        result = str(convert_number_under_1000_2_text(number_str[args[1]:(args[2] + 1)]))
+        if int(number_str[args[2]]) < 5:
+            result += args[0][int(number_str[args[2]])]
         else:
-            result = str(convert_number_under_1000_2_text(number_str[args[1]:(args[2]+1)])) + args[0][0]
+            result += args[0][5]
         return result
 
     """ Формуємо суму копійок"""
