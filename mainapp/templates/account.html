@@ -11,7 +11,17 @@
 <div class="large-offset-1 large-11 columns">
     <h4> Мій Рахунок: {{ account.number }} </h4>
     <p> Залишок на рахунку: {{ balance }} грн</p>
+    <p> Дата: {{ dt_now }} </p>
+    <form action="/account/{{account.id}}/" method="post">
+        {% csrf_token %}
+        <hr />
+        <p style = "text-align: center">Відомості по рахунку за період</p>
+        <p style = "text-align: center"> з: <input type="date" name="start_dt" value = "{{ start_dt }}" max = "{{ end_dt }}">
+        до: <input type="date" name="end_dt" value = "{{ end_dt }}" min = "{{ start_dt }}"></p>
+        <p style = "text-align: center"><input type="submit" value="Показати"></p>
+    </form>
     <hr />
+    {% if documents %}
     <table class="table table-condensed table-striped">
         <thead>
             <tr>
@@ -46,6 +56,7 @@
             {% endfor %}
         </tbody>
     </table>
+    {% endif %}
 </div>
 
 {% endblock %}

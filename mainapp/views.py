@@ -2,8 +2,9 @@ from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.contrib import auth
 from django.template.context_processors import csrf
-from mainapp.models import Accounts, Users_Accounts, Balances, Documents, Currencies, Banks
+from mainapp.models import Accounts, Users_Accounts, Balances, Documents, Currencies, Banks, Users
 from datetime import date, datetime
+from django.utils import formats
 
 # Create your views here.
 def start(request):
@@ -14,7 +15,11 @@ def accounts(request):
     args.update(csrf(request))
 
     args['username'] = auth.get_user(request).username
-    accounts = Accounts.objects.all()
+    if auth.get_user(request).is_superuser:
+        accounts = Accounts.objects.all()
+    else:
+        user = Users.objects.get(code=args['username'])
+        accounts = Accounts.objects.filter(users_accounts__id_client=user)
     for account in accounts:
         account.balance = '{:.2f}'.format(float(Balances.objects.filter(id_account=account.id).latest('dt').balance) / 100.00)
         account.currency = Currencies.objects.get(code_currency=account.currency)
@@ -24,13 +29,23 @@ def accounts(request):
 def account(request, id_account):
     args = {}
     args.update(csrf(request))
-    documents = Documents.objects.filter(id_account=id_account)
+    dt_now = datetime.now(tz=None)
+    start_dt = end_dt = formats.date_format(dt_now, "Y-m-d")
+    args['dt_now'] = dt_now
+    if request.method == 'POST':
+        start_dt = request.POST['start_dt']
+        end_dt = request.POST['end_dt']
+    args['start_dt'] = start_dt
+    args['end_dt'] = end_dt
+
+    documents = Documents.objects.filter(id_account=id_account).filter(dt__gte=start_dt)
     for document in documents:
         document.amount = '{:.2f}'.format(float(document.amount) / 100.00)
 
 
     args['documents'] = documents
     args['account'] = Accounts.objects.get(id=id_account)
+
     args['username'] = auth.get_user(request).username
     args['balance'] = '{:.2f}'.format(float(Balances.objects.filter(id_account=id_account).latest('dt').balance) / 100.00)
     return render_to_response('account.html', args)
@@ -41,7 +56,7 @@ def doc(request, id):
     document = Documents.objects.get(id=id)
     document.words_amount = convert_num2text(document.amount)
     document.amount = '{:.2f}'.format(float(document.amount) / 100.00)
-    document.dt = datetime.strptime(document.dt, '%Y/%m/%d %H:%M:%S')
+    document.dt = datetime.strptime(document.dt, '%Y-%m-%d')
     document.dt_bank = datetime.strptime(document.dt_bank, '%Y/%m/%d %H:%M:%S')
     document.bank_name_a = Banks.objects.get(code_bank=document.code_bank_a).bank_name
     document.bank_name_b = Banks.objects.get(code_bank=document.code_bank_b).bank_name
